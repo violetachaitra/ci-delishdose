@@ -64,7 +64,8 @@
                             <td><?php echo $item['created_at'] ?></td>
                             <td><?php echo number_to_currency($item['total_harga'], 'IDR') ?></td>
                             <td><?php echo $item['alamat'] ?></td>
-                            <td><?php echo ($item['status'] == "1") ? "Sudah Selesai" : "Belum Selesai" ?></td>
+                            <!-- ($item['status'] == "1") ? "Sudah Selesai" : "Belum Selesai" ?> -->
+                            <td><?php echo [0 => 'Menunggu Pembayaran', 1 => 'Sudah Dibayar', 2 => 'Sedang Dikirim', 3 => 'Sudah Selesai', 4 => 'Dibatalkan'][$item['status']] ?? 'Status Tidak Diketahui' ?></td>
                             <td>
                                 <button type="button" class="profile-btn-detail" data-bs-toggle="modal" data-bs-target="#detailModal-<?= $item['id'] ?>">
                                     Detail
