@@ -140,6 +140,22 @@ class TransaksiController extends BaseController
         return $this->response->setJSON($body['data']);
     }
 
+    public function uploadBukti($id)
+    {
+        $file = $this->request->getFile('bukti_pembayaran');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $newName = $file->getRandomName();
+            $file->move('uploads/bukti/', $newName);
+    
+            $model = new TransactionModel();
+            $model->update($id, [
+                'bukti_pembayaran' => $newName,
+                'status' => 1 // langsung ubah jadi Sudah Dibayar
+            ]);
+        }
+        return redirect()->back();
+    }
+    
     public function buy()
     {
         if ($this->request->getPost()) { 
@@ -187,5 +203,6 @@ class TransaksiController extends BaseController
                 return redirect()->back()->with('error', 'Gagal memperbarui status transaksi.'); 
             } 
         } 
+
 }
 

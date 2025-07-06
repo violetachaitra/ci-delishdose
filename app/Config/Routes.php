@@ -48,7 +48,18 @@ $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
 $routes->get('dashboard/cetak', 'Dashboard::exportpdf', ['filter' => 'auth']);
 $routes->get('dashboard/export-pdf', 'Dashboard::exportpdf', ['filter' => 'auth']);
 
+//upload bukti
+$routes->post('upload-bukti/(:num)', 'TransaksiController::uploadBukti/$1');
+$routes->post('admin/update-status/(:num)', 'TransaksiController::updateStatus/$1');
+
+//laporan penjualan
+$routes->get('laporan-penjualan', 'LaporanController::index');
+$routes->get('laporan-penjualan/download', 'LaporanController::download');
+$routes->get('laporan-penjualan/export-excel', 'LaporanController::exportExcel');
+$routes->get('laporan-penjualan/export-pdf', 'LaporanController::download');
 
 $routes->resource('api', ['controller' => 'apiController']);
+
+//update status
 $routes->post('penjualan/updateStatus/(:any)', 'TransaksiController::updateStatus/$1', ['filter' => 'auth']); 
 $routes->get('penjualan', 'Home::penjualan', ['filter' => 'auth']);

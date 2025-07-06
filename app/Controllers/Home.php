@@ -11,6 +11,7 @@ class Home extends BaseController
     protected $product;
     protected $transaction;
     protected $transaction_detail;
+
     function __construct()
     {
         helper('form');
@@ -49,27 +50,43 @@ class Home extends BaseController
     public function profile()
     {
         $username = session()->get('username');
+        $role = session()->get('role');
         $data['username'] = $username;
-
-        $buy = $this->transaction->where('username', $username)->findAll();
+    
+        if ($role === 'admin') {
+            // Admin melihat semua transaksi kecuali miliknya sendiri
+            $buy = $this->transaction
+                ->where('username !=', 'admin')
+                ->findAll();
+        } else {
+            // Guest hanya melihat transaksi miliknya
+            $buy = $this->transaction
+                ->where('username', $username)
+                ->findAll();
+        }
+    
         $data['buy'] = $buy;
-
+    
+        // Ambil detail produk setiap transaksi
         $product = [];
-
+    
         if (!empty($buy)) {
             foreach ($buy as $item) {
-                $detail = $this->transaction_detail->select('transaction_detail.*, product.nama, product.harga, product.foto')->join('product', 'transaction_detail.product_id=product.id')->where('transaction_id', $item['id'])->findAll();
-
-                if (!empty($detail)) {
-                    $product[$item['id']] = $detail;
-                }
+                $detail = $this->transaction_detail
+                    ->select('transaction_detail.*, product.nama, product.harga, product.foto')
+                    ->join('product', 'transaction_detail.product_id = product.id')
+                    ->where('transaction_id', $item['id'])
+                    ->findAll();
+    
+                $product[$item['id']] = $detail;
             }
         }
-
+    
         $data['product'] = $product;
-
+    
         return view('v_profile', $data);
     }
+    
 
     public function contact()
     {

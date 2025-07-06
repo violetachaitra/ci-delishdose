@@ -36,81 +36,101 @@
         border-top-right-radius: 1.2rem;
     }
 </style>
+
 <div class="profile-card">
     History Transaksi Pembelian <strong><?= $username ?></strong>
     <hr>
     <div class="table-responsive">
-        <!-- Table with stripped rows -->
         <table class="table profile-table datatable">
             <thead>
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">ID Pembelian</th>
-                    <th scope="col">Waktu Pembelian</th>
-                    <th scope="col">Total Bayar</th>
-                    <th scope="col">Alamat</th>
-                    <th scope="col">Status</th>
-                    <th scope="col"></th>
+                    <th>#</th>
+                    <th>ID Pembelian</th>
+                    <?php if (session()->get('role') === 'admin'): ?>
+                        <th>Nama Customer (Username)</th>
+                    <?php endif; ?>
+                    <th>Waktu Pembelian</th>
+                    <th>Total Bayar</th>
+                    <th>Alamat</th>
+                    <th>Status</th>
+                    <th>Bukti Pembayaran</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                <?php
-                if (!empty($buy)) :
-                    foreach ($buy as $index => $item) :
-                ?>
+                <?php if (!empty($buy)) : ?>
+                    <?php foreach ($buy as $index => $item) :
+                        // ADMIN tidak perlu lihat transaksi admin sendiri
+                        if (session()->get('role') === 'admin' && $item['username'] === 'admin') continue;
+                    ?>
                         <tr>
-                            <th scope="row"><?php echo $index + 1 ?></th>
-                            <td><?php echo $item['id'] ?></td>
-                            <td><?php echo $item['created_at'] ?></td>
-                            <td><?php echo number_to_currency($item['total_harga'], 'IDR') ?></td>
-                            <td><?php echo $item['alamat'] ?></td>
-                            <!-- ($item['status'] == "1") ? "Sudah Selesai" : "Belum Selesai" ?> -->
-                            <td><?php echo [0 => 'Menunggu Pembayaran', 1 => 'Sudah Dibayar', 2 => 'Sedang Dikirim', 3 => 'Sudah Selesai', 4 => 'Dibatalkan'][$item['status']] ?? 'Status Tidak Diketahui' ?></td>
+                            <td><?= $index + 1 ?></td>
+                            <td><?= $item['id'] ?></td>
+                            <?php if (session()->get('role') === 'admin'): ?>
+                                <td><?= $item['username'] === 'admin' ? 'ADMIN' : esc($item['username']) ?></td>
+                            <?php endif; ?>
+                            <td><?= $item['created_at'] ?></td>
+                            <td><?= number_to_currency($item['total_harga'], 'IDR') ?></td>
+                            <td><?= $item['alamat'] ?></td>
                             <td>
-                                <button type="button" class="profile-btn-detail" data-bs-toggle="modal" data-bs-target="#detailModal-<?= $item['id'] ?>">
-                                    Detail
-                                </button>
+                                <?= [0 => 'Menunggu Pembayaran', 1 => 'Sudah Dibayar', 2 => 'Sedang Dikirim', 3 => 'Sudah Selesai', 4 => 'Dibatalkan'][$item['status']] ?? 'Status Tidak Diketahui' ?>
                             </td>
-                        </tr>
-                        <!-- Detail Modal Begin -->
+                            <td>
+                    <?php if (session()->get('role') !== 'admin' && $item['status'] == 0): ?>
+                        <form action="<?= base_url('upload-bukti/' . $item['id']) ?>" method="post" enctype="multipart/form-data">
+                            <input type="file" name="bukti_pembayaran" accept="image/*" required class="form-control mb-1">
+                            <button class="btn btn-sm btn-primary">Upload</button>
+                        </form>
+                    <?php elseif (!empty($item['bukti_pembayaran']) && file_exists("uploads/bukti/" . $item['bukti_pembayaran'])): ?>
+                        <a href="<?= base_url("uploads/bukti/" . $item['bukti_pembayaran']) ?>" target="_blank">Lihat Bukti</a>
+                    <?php else: ?>
+                        <em>-</em>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <button type="button" class="profile-btn-detail" data-bs-toggle="modal" data-bs-target="#detailModal-<?= $item['id'] ?>">
+                        Detail
+                    </button>
+                </td>
+            </tr>
+
+                        <!-- Modal Detail -->
                         <div class="modal fade" id="detailModal-<?= $item['id'] ?>" tabindex="-1">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Detail Data</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <h5 class="modal-title">Detail Transaksi</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <?php 
-                                        if(!empty($product)){
-                                            foreach ($product[$item['id']] as $index2 => $item2) : ?>
-                                                <?php echo $index2 + 1 . ")" ?>
-                                                <?php if ($item2['foto'] != '' and file_exists("img/" . $item2['foto'] . "")) : ?>
-                                                    <img src="<?php echo base_url() . "img/" . $item2['foto'] ?>" width="100px">
+                                        <?php if (!empty($product[$item['id']])) :
+                                            foreach ($product[$item['id']] as $i => $item2) : ?>
+                                                <?= $i + 1 ?>)
+                                                <?php if (!empty($item2['foto']) && file_exists("img/" . $item2['foto'])): ?>
+                                                    <img src="<?= base_url("img/" . $item2['foto']) ?>" width="100px">
                                                 <?php endif; ?>
-                                                <strong><?= $item2['nama'] ?></strong>
-                                                <?= number_to_currency($item2['harga'], 'IDR') ?>
-                                                <br>
-                                                <?= "(" . $item2['jumlah'] . " pcs)" ?><br>
-                                                <?= number_to_currency($item2['subtotal_harga'], 'IDR') ?>
+                                                <strong><?= $item2['nama'] ?></strong><br>
+                                                <?= number_to_currency($item2['harga'], 'IDR') ?> x <?= $item2['jumlah'] ?> pcs<br>
+                                                <?= number_to_currency($item2['harga'] * $item2['jumlah'], 'IDR') ?>
                                                 <hr>
-                                            <?php 
-                                            endforeach; 
-                                        }
-                                        ?>
-                                        Ongkir <?= number_to_currency($item['ongkir'], 'IDR') ?>
+                                        <?php endforeach; endif; ?>
+                                        <p>Ongkir: <?= number_to_currency($item['ongkir'], 'IDR') ?></p>
+                                        <p><strong>Status:</strong> <?= [0 => 'Menunggu Pembayaran', 1 => 'Sudah Dibayar', 2 => 'Sedang Dikirim', 3 => 'Sudah Selesai', 4 => 'Dibatalkan'][$item['status']] ?? 'Status Tidak Diketahui' ?></p>
+
+                                        <?php if (!empty($item['bukti_pembayaran']) && file_exists("uploads/bukti/" . $item['bukti_pembayaran'])): ?>
+                                            <p><strong>Bukti Pembayaran:</strong></p>
+                                            <img src="<?= base_url("uploads/bukti/" . $item['bukti_pembayaran']) ?>" width="100%">
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Detail Modal End -->
-                <?php
-                    endforeach;
-                endif;
-                ?>
+                        <!-- End Modal -->
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </tbody>
         </table>
-        <!-- End Table with stripped rows -->
     </div>
 </div>
+
 <?= $this->endSection() ?>
