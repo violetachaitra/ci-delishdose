@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ProductModel;
 use App\Models\TransactionModel;
 use App\Models\UserModel;
+use App\Models\DashboardTransactionModel;
 use Dompdf\Dompdf;
 
 class Dashboard extends BaseController
@@ -50,7 +51,8 @@ class Dashboard extends BaseController
         if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
             return redirect()->to('/');
         }
-        $transactions = $this->transaction->orderBy('created_at', 'DESC')->findAll();
+        $dashboardTransaction = new DashboardTransactionModel();
+        $transactions = $dashboardTransaction->getTransactionsWithProducts();
         $totalUser = $this->user->countAllResults();
         $totalTransaksi = $this->transaction->countAllResults();
         $totalPendapatan = $this->transaction->selectSum('total_harga')->first()['total_harga'] ?? 0;
@@ -81,7 +83,8 @@ class Dashboard extends BaseController
             return redirect()->to('login');
         }
 
-        $data['transactions'] = $this->transaction->findAll();
+        $dashboardTransaction = new DashboardTransactionModel();
+        $data['transactions'] = $dashboardTransaction->getTransactionsWithProducts();
         // Convert logo to base64 for dompdf
         $logoPath = FCPATH . 'img/logo-delishdose.png';
         if (file_exists($logoPath)) {

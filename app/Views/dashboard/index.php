@@ -190,8 +190,9 @@
                     <th>No</th>
                     <th>Username</th>
                     <th>Alamat</th>
+                    <th>Produk</th>
                     <th>Total Harga</th>
-                    <th>Ongkir</th>
+                    <!-- <th>Ongkir</th> -->
                     <th>Status</th>
                     <th>Tanggal Transaksi</th>
                 </tr>
@@ -200,30 +201,25 @@
                 <?php if (!empty($transactions)) :
                     $i = 1;
                     $statusOptions = [
-                        'belum_selesai' => 'Belum Selesai',
-                        'dikemas' => 'Dikemas',
-                        'dikirim' => 'Dikirim',
-                        'selesai' => 'Selesai'
+                        0 => 'Menunggu Pembayaran',
+                        1 => 'Sudah Dibayar',
+                        2 => 'Sedang Dikirim',
+                        3 => 'Sudah Selesai',
+                        4 => 'Dibatalkan'
                     ];
                     foreach ($transactions as $item1) :
                 ?>
                         <tr>
-                            <td><span class="badge rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center" style="width: 36px; height: 36px; font-size: 1rem;"><?= $i++ ?></span></td>
+                            <td><span class="badge rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center" style="width: 36px; height: 36px; font-size: 1rem;"> <?= $i++ ?> </span></td>
                             <td><i class="fa-solid fa-user"></i> <?= $item1['username']; ?></td>
                             <td><i class="fa-solid fa-location-dot"></i> <?= $item1['alamat']; ?></td>
+                            <td><?= esc($item1['produk'] ?? '-') ?></td>
                             <td><span class="text-success">Rp <?= number_format($item1['total_harga'], 0, ',', '.') ?></span></td>
-                            <td><span class="text-info">Rp <?= number_format($item1['ongkir'], 0, ',', '.') ?></span></td>
+                            <!-- <td><span class="text-info">Rp <?= number_format($item1['ongkir'], 0, ',', '.') ?></span></td> -->
                             <td>
-                                <form action="<?= base_url('transaksi/updateStatus') ?>" method="post">
-                                    <input type="hidden" name="id" value="<?= $item1['id'] ?>">
-                                    <select name="status" class="form-select" onchange="this.form.submit()">
-                                        <?php foreach ($statusOptions as $value => $label) : ?>
-                                            <option value="<?= $value ?>" <?= $item1['status'] == $value ? 'selected' : '' ?>>
-                                                <?= $label ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </form>
+                                <div class="mt-1 small text-muted">
+                                    <?= $statusOptions[$item1['status']] ?? 'Status Tidak Diketahui' ?>
+                                </div>
                             </td>
                             <td><i class="fa-regular fa-calendar"></i> <?= $item1['created_at']; ?></td>
                         </tr>

@@ -142,61 +142,39 @@
                 <table style="width:100%; border-collapse:collapse; font-size:16px;">
                     <thead>
                         <tr>
-                            <th
-                                style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">
-                                No</th>
-                            <th
-                                style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">
-                                Username</th>
-                            <th
-                                style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">
-                                Alamat</th>
-                            <th
-                                style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">
-                                Total Harga</th>
-                            <th
-                                style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">
-                                Ongkir</th>
-                            <th
-                                style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">
-                                Status</th>
-                            <th
-                                style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">
-                                Tanggal Transaksi</th>
+                            <th style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">No</th>
+                            <th style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">Username</th>
+                            <th style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">Alamat</th>
+                            <th style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">Produk</th>
+                            <th style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">Total Harga</th>
+                            <th style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">Status</th>
+                            <th style="background:linear-gradient(90deg,#f3c4e3 80%,#f9bec7 100%); color:#a4133c; font-weight:700; font-size:17px; padding:14px 8px;">Tanggal Transaksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (!empty($transactions)): ?>
                         <?php $i = 1;
+                        $statusOptions = [
+                            0 => 'Menunggu Pembayaran',
+                            1 => 'Sudah Dibayar',
+                            2 => 'Sedang Dikirim',
+                            3 => 'Sudah Selesai',
+                            4 => 'Dibatalkan'
+                        ];
                         foreach ($transactions as $row): ?>
                         <tr style="background:<?= $i%2==0?'#ffe0ef':'#fffafd' ?>;">
                             <td><?= $i++ ?></td>
                             <td><?= esc($row['username']) ?></td>
                             <td class="text-left" style="text-align:left;"><?= esc($row['alamat']) ?></td>
+                            <td><?= esc($row['produk'] ?? '-') ?></td>
                             <td>Rp <?= number_format($row['total_harga'], 0, ',', '.') ?></td>
-                            <td>Rp <?= number_format($row['ongkir'], 0, ',', '.') ?></td>
-                            <td>
-                                <?php
-                                $statusList = [
-                                '0' => 'Belum Selesai',
-                                '1' => 'Dikemas',
-                                '2' => 'Dikirim',
-                                '3' => 'Selesai',
-                                'belum_selesai' => 'Belum Selesai',
-                                'dikemas' => 'Dikemas',
-                                'dikirim' => 'Dikirim',
-                                'selesai' => 'Selesai'
-                                ];
-                                $statusKey = $row['status'];
-                                echo isset($statusList[$statusKey]) ? $statusList[$statusKey] : $statusKey;
-                                ?>
-                            </td>
+                            <td><?= $statusOptions[$row['status']] ?? $row['status'] ?></td>
                             <td><?= date('d-m-Y H:i', strtotime($row['created_at'])) ?></td>
                         </tr>
                         <?php endforeach ?>
                         <?php else: ?>
                         <tr>
-                            <td colspan="7">Tidak ada data transaksi.</td>
+                            <td colspan="8">Tidak ada data transaksi.</td>
                         </tr>
                         <?php endif ?>
                     </tbody>
