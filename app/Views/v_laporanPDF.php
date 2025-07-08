@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Laporan Penjualan Aylin Store</title>
+    <title>Laporan Penjualan Delishdose</title>
     <style>
         body { font-family: Arial, sans-serif; font-size: 12px; }
         h2 { text-align: center; margin-bottom: 10px; }
